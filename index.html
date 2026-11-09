@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graduación - Paula</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@200;400;600&family=Tenor+Sans&family=Alex+Brush&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ballet:opsz@16..72&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <meta name="format-detection" content="telephone=no">
+    <style>
+        /* ================= BASE ================= */
+        html, body { overflow-x: hidden; }
+
+        body {
+            margin: 0;
+            background-image: url("fondo6.png");
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #5d4936;
+            padding-bottom: 20px;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+        body.bloqueado { overflow: hidden; height: 100vh; }
+
+        img {
+            display: block;
+            height: auto;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            image-rendering: -webkit-optimize-contrast;
+            transform: translateZ(0);
+        }
+
+        /* ================= ANIMACIONES ================= */
+        @keyframes fadeInCursive {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes revealNames {
+            0% { opacity: 0; letter-spacing: 10px; filter: blur(10px); transform: scale(0.95); }
+            100% { opacity: 1; letter-spacing: 0; filter: blur(0); transform: scale(1); }
+        }
+        @keyframes flotar {
+            0%   { transform: translate(-50%, 0); }
+            50%  { transform: translate(-50%, -15px); }
+            100% { transform: translate(-50%, 0); }
+        }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* ================= PORTADA ================= */
+        #preloader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #fff;
+            z-index: 999999;
+            cursor: pointer;
+            transition: opacity .8s ease, visibility .8s ease;
+        }
+        #preloader.hide { opacity: 0; visibility: hidden; }
+        .contenedor-portada { position: relative; width: 100%; height: 100%; }
+        .preloader-full,
+        .preloader-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            margin: 0;
+        }
+        .preloader-video { opacity: 0; transition: opacity .3s ease; }
+        .preloader-video.activo { opacity: 1; }
+        .texto-tocar {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            width: 100%;
+            animation: flotar 3s ease-in-out infinite;
+            color: #ffffff;
+            font-family: sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+        }
+        .texto-tocar.oculto { display: none; }
+
+        /* ================= CABECERA ================= */
+        .header-section {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            aspect-ratio: 447 / 458;
+            box-sizing: border-box;
+            background:
+                linear-gradient(rgba(0,0,0,.10), rgba(0,0,0,.18)),
+                url('foto1.jpeg') center center / cover no-repeat;
+            text-align: center;
+        }
+        .cursive {
+            position: absolute;
+            top: 12%;
+            left: 0; right: 0;
+            font-family:  'Pinyon Script', 'Great Vibes', cursive;
+            font-size: clamp(2.6rem, 15vw, 6rem);
+            line-height: .95;
+            margin: 0;
+            font-weight: 400;
+            color: #ffffff;
+            text-shadow: 0 1px 8px rgba(0,0,0,.35);
+            animation: fadeInCursive 1.5s ease-out forwards;
+            opacity: 0;
+        }
+        .nombres-tit {
+            position: absolute;
+            bottom: 7%;
+            left: 0; right: 0;
+            font-family: 'Bodoni Moda', serif;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: clamp(1.4rem, 8.6vw, 3.6rem);
+            font-weight: 400;
+            margin: 0;
+            color: #ffffff;
+            text-shadow: 0 1px 8px rgba(0,0,0,.4);
+            line-height: 1.1;
+            opacity: 0;
+            animation: revealNames 2.5s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+            animation-delay: 0.5s;
+        }
+        .music-player {
+            position: absolute;
+            top: 15px; right: 15px;
+            width: 45px; height: 45px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            cursor: pointer;
+        }
+        .play-button {
+            width: 45px; height: 45px;
+            border: 1.5px solid #ffffff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            background-color: rgba(0,0,0,0.25);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        }
+        .play-button::after {
+            content: '';
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid #ffffff;
+            margin-left: 3px;
+        }
+        .music-playing .play-button::after {
+            width: 10px; height: 12px;
+            border-left: 3px solid #ffffff;
+            border-right: 3px solid #ffffff;
+            border-top: 0; border-bottom: 0;
+            margin-left: 0;
+        }
+
+        /* ================= ESTÁS INVITADO ================= */
+        .seccion-invitado {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 60px 25px 40px;
+            text-align: center;
+            background: url("fondo100.png") center / cover no-repeat;
+        }
+        .inv-pre { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; letter-spacing: 1px; margin: 0 0 8px; color: #5d4936; }
+        .inv-titulo { font-family: 'Bodoni Moda', serif; font-size: clamp(2rem, 10vw, 3rem); font-weight: 400; letter-spacing: 3px; text-transform: uppercase; color: #2b1d0d; margin: 0; }
+        .inv-de { font-family: 'Great Vibes', cursive; font-size: 1.6rem; color: #8d7a64; margin: 6px 0 0; }
+        .inv-nombre { font-family: 'Great Vibes', cursive; font-size: clamp(2.8rem, 13vw, 4rem); font-weight: 400; color: #8d7a64; margin: 0; line-height: 1.1; }
+
+        /* ================= DOS FOTOS + TEXTO ================= */
+        .seccion-fotos-dobles { width: 100%; box-sizing: border-box; padding: 0; display: flex; justify-content: center; }
+        .fotos-dobles { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; width: 100%; max-width: 700px; overflow: hidden; }
+        .fotos-dobles img { width: 100%; height: min(110vw, 600px); object-fit: cover; border-radius: 0; margin: 0; }
+        .texto-fotos {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            margin: 0;
+            padding: 90px 24px 28px;
+            box-sizing: border-box;
+            background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,0) 100%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 4.4vw, 1.3rem);
+            font-style: italic;
+            line-height: 1.55;
+            color: #ffffff;
+            text-align: center;
+            text-shadow: 0 1px 6px rgba(0,0,0,.5);
+        }
+
+        /* ================= ITINERARIO ================= */
+        .seccion-itinerario-gala { width: 100%; box-sizing: border-box; background: #000; padding: 60px 20px 55px; display: flex; flex-direction: column; align-items: center; }
+        .itin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 38px 14px; width: 100%; max-width: 420px; }
+        .itin-item { display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; color: #f1ebdd; }
+        .itin-circulo { width: 86px; height: 86px; border-radius: 50%; background: #f1ebdd; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .itin-circulo svg { width: 46px; height: 46px; }
+        .itin-item h3 { font-family: 'Tenor Sans', sans-serif; font-size: 1.35rem; font-weight: 400; margin: 0 0 8px; color: #f1ebdd; }
+        .itin-item p { font-family: 'Tenor Sans', sans-serif; font-size: .78rem; line-height: 1.5; letter-spacing: .5px; margin: 0; color: #f1ebdd; }
+        .btn-ubicacion {
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-top: 42px; padding: 14px 34px;
+            border: 1px solid #c9a24a; border-radius: 40px;
+            color: #e6cf8b; text-decoration: none;
+            font-size: .7rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;
+            transition: background .3s ease, color .3s ease;
+        }
+        .btn-ubicacion svg { width: 18px; height: 18px; }
+        .btn-ubicacion:hover { background: #c9a24a; color: #000; }
+
+        /* ================= CALENDARIO ================= */
+        .seccion-calendario { width: 100%; box-sizing: border-box; padding: 60px 15px; background: #f6f1e4 url("fondo100.png") center / cover no-repeat; display: flex; justify-content: center; }
+        .cal-arco {
+            position: relative; width: 100%; max-width: 340px; box-sizing: border-box;
+            padding: 70px 22px 38px;
+            background: linear-gradient(180deg, #0b0b0b 0%, #000 100%);
+            border-radius: 999px 999px 18px 18px;
+            box-shadow: 0 14px 35px rgba(0,0,0,.35);
+            text-align: center; color: #c9a24a;
+        }
+        .cal-arco::before { content: ''; position: absolute; inset: 9px; border: 1px solid rgba(201,162,74,.55); border-radius: 999px 999px 12px 12px; pointer-events: none; }
+        .cal-mes-sup { font-size: .6rem; letter-spacing: 6px; margin: 0 0 12px; color: #c9a24a; }
+        .cal-fecha { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .cal-txt { font-size: .62rem; letter-spacing: 3px; padding-bottom: 6px; border-bottom: 1px solid #c9a24a; min-width: 62px; color: #e6cf8b; }
+        .cal-num { font-family: 'Great Vibes', cursive; font-size: 4rem; line-height: 1; color: #d4af37; }
+        .cal-script { font-family: 'Great Vibes', cursive; font-size: 2.3rem; font-weight: 400; margin: 14px 0 4px; color: #d4af37; }
+        .cal-mes { font-size: .7rem; letter-spacing: 5px; margin: 0 0 22px; color: #c9a24a; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 16px; align-items: center; justify-items: center; }
+        .cal-sem { font-size: .52rem; letter-spacing: 1px; color: #8a7440; margin-bottom: 4px; }
+        .dia { font-family: 'Tenor Sans', sans-serif; font-size: .85rem; color: #d4af37; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .dia-grad { border: 1.5px solid #d4af37; border-radius: 50%; font-weight: 700; background: #000; }
+        .dia-grad .cap { position: absolute; top: -17px; left: 50%; transform: translateX(-50%); width: 34px; height: auto; z-index: 2; }
+
+        /* ================= CONTADOR / CONFIRMACIÓN ================= */
+        .seccion-contador { width: 100%; background-image: url('fondo5.png'); background-size: cover; background-position: center; padding: 60px 15px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+        .capsula-tiempo { background-image: url('fondo100.png'); background-size: cover; background-position: center; width: 100%; max-width: 500px; padding: 30px 10px; border-radius: 50px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 40px; box-sizing: border-box; }
+        .preparate { letter-spacing: 3px; font-size: 1.1rem; margin: 0; font-weight: 200; }
+        .nos-vemos { letter-spacing: 2px; font-size: 0.65rem; margin: 5px 0 20px; opacity: 0.8; }
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .timer-item span { display: block; font-family: 'Tenor Sans', sans-serif; font-size: clamp(1.1rem, 5vw, 1.5rem); }
+        .timer-label { font-size: 0.55rem; margin-top: 5px; color: #8d7a64; text-transform: uppercase; }
+        .confirmacion-texto { text-align: center; max-width: 450px; color: #fdfaf5; padding: 0 10px; }
+        .confirmacion-texto h2 { font-family: 'Alex Brush', cursive; font-size: clamp(2rem, 10vw, 2.8rem); margin-bottom: 15px; font-weight: normal; }
+        .confirmacion-texto p { font-size: 0.8rem; line-height: 1.5; margin-bottom: 25px; letter-spacing: 0.5px; }
+        .btn-blanco-outline { display: inline-block; padding: 12px 30px; border: 2px solid #fdfaf5; border-radius: 30px; color: #fdfaf5; text-decoration: none; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ================= REGALOS ================= */
+        .seccion-regalos { width: 100%; background-image: url('fondo3.png'); background-size: cover; padding: 40px 20px 80px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+        .tarjeta-regalo-cafe { background-color: #ffffff; background-image: url('fondo1001.png'); background-size: cover; width: 100%; max-width: 400px; padding: 30px 20px 60px; border-radius: 25px; text-align: center; color: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
+        .regalo-cursive-top { font-family: 'Alex Brush', cursive; font-size: 2.2rem; color: #ffffff; margin: 0; font-weight: 400; }
+        .tarjeta-regalo-cafe img.icon-regalo-line { width: 100px; filter: brightness(0) invert(1); margin: 0 auto 15px; }
+        .titulo-datos-white { font-size: 0.8rem; letter-spacing: 3px; margin: 20px 0 10px; font-weight: 500; text-transform: uppercase; color: #ffffff; }
+        .tarjeta-regalo-cafe p { font-family: 'Montserrat', sans-serif; font-style: italic; font-size: 0.6rem; letter-spacing: 0.5px; line-height: 1.5; margin: 4px 0; font-weight: 500; color: #ffffff !important; word-wrap: break-word; }
+
+        /* ================= LUGARES RESERVADOS ================= */
+        .seccion-reservado { width: 100%; box-sizing: border-box; background: #000; padding: 60px 20px; display: flex; justify-content: center; }
+        .reservado-card { position: relative; width: 100%; max-width: 340px; box-sizing: border-box; padding: 45px 20px; border: 1px solid #c9a24a; text-align: center; color: #e6cf8b; }
+        .reservado-card::before { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(201,162,74,.35); pointer-events: none; }
+        .res-pre { font-family: 'Great Vibes', cursive; font-size: 2.2rem; margin: 0; color: #d4af37; }
+        .res-num { font-family: 'Bodoni Moda', serif; font-size: 5rem; line-height: 1.1; margin: 6px 0 0; color: #d4af37; }
+        .res-lugar { font-size: .8rem; letter-spacing: 4px; text-transform: uppercase; margin: 6px 0 0; color: #f1ebdd; }
+        .res-invitado { display: none; margin: 20px 0 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: #e6cf8b; }
+
+        /* ================= GALERÍA DE FOTOS ================= */
+        .seccion-galeria { width: 100%; box-sizing: border-box; padding: 60px 18px; text-align: center; background: #f2eee3 url('fondo100.png') center / cover no-repeat; }
+        .gal-sub { font-size: .65rem; letter-spacing: 6px; color: #8d7a64; margin: 0; }
+        .gal-titulo { font-family: 'Great Vibes', cursive; font-size: 2.8rem; font-weight: 400; color: #5d4936; margin: 4px 0 28px; }
+        .galeria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 520px; margin: 0 auto; }
+        .foto-item { position: relative; aspect-ratio: 3 / 4; padding: 5px; box-sizing: border-box; background: #fff; box-shadow: 0 8px 18px rgba(0,0,0,.2); }
+        .foto-item::after { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(255,255,255,.85); pointer-events: none; }
+        .foto-item img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
+
+        /* Cuadro horizontal (foto 8) */
+        .foto-item.foto-horizontal { grid-column: 1 / -1; aspect-ratio: auto; }
+        .foto-item.foto-horizontal img { height: auto; object-fit: contain; }
+
+        /* ===== VISOR DE FOTOS (lightbox) ===== */
+        body.lb-abierto { overflow: hidden; }
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.94); z-index: 1000000; display: none; align-items: center; justify-content: center; }
+        #lightbox.abierto { display: flex; }
+        #lb-img { max-width: 92vw; max-height: 86vh; object-fit: contain; margin: 0; transform: none; user-select: none; -webkit-user-drag: none; }
+        .lb-btn {
+            position: absolute;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.5);
+            color: #fff;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            font-size: 1.6rem; line-height: 1;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #lb-cerrar { top: 16px; right: 16px; }
+        #lb-prev { left: 10px; top: 50%; transform: translateY(-50%); }
+        #lb-next { right: 10px; top: 50%; transform: translateY(-50%); }
+        #lb-contador { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; color: #fff; font-size: .75rem; letter-spacing: 3px; }
+
+        /* ================= INTERACTIVA (sin tarjetas) ================= */
+        .seccion-interactiva {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 70px 20px;
+            background:
+             
+                url('Captura\ de\ pantalla\ 2026-11-09\ 114001.png') center / cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .interactiva-sub { font-size: .65rem; letter-spacing: 6px; color: #e6cf8b; margin: 0 0 6px; }
+        .interactiva-tit { font-family: 'Great Vibes', cursive; font-size: 2.6rem; font-weight: 400; color: #ffffff; margin: 0 0 40px; }
+        .interactiva-lista { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 340px; }
+        .item-interactivo { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .item-interactivo img { width: 70px; filter: brightness(0) invert(1); opacity: .9; margin: 0 auto 16px; }
+        .item-interactivo h3 { font-family: 'Alex Brush', cursive; font-size: 2rem; font-weight: 400; color: #ffffff; margin: 0 0 10px; }
+        .item-interactivo p { font-size: .78rem; line-height: 1.7; letter-spacing: .5px; color: #f1ebdd; margin: 0 0 22px; }
+        .btn-gold {
+            display: inline-block;
+            padding: 13px 34px;
+            border: 1px solid #c9a24a;
+            border-radius: 40px;
+            color: #e6cf8b;
+            text-decoration: none;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: background .3s ease, color .3s ease;
+        }
+        .btn-gold:hover { background: #c9a24a; color: #000; }
+        .separador-dorado { display: flex; align-items: center; gap: 12px; width: 100%; margin: 44px 0; color: #c9a24a; }
+        .separador-dorado::before, .separador-dorado::after { content: ''; flex: 1; height: 1px; background: rgba(201,162,74,.55); }
+        .separador-dorado span { font-size: .8rem; }
+
+        /* ================= FINAL / CRÉDITOS ================= */
+        .seccion-final { width: 100%; padding: 60px 20px 40px; background-image: url('fondo1001.png'); background-size: cover; background-position: center; text-align: center; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+        .divisor-elegante { width: 50px; height: 1px; background-color: #8d7a64; margin-bottom: 25px; opacity: 0.6; }
+        .texto-final { font-family: 'Tenor Sans', sans-serif; font-size: 1rem; letter-spacing: 4px; color: #5d4936; text-transform: uppercase; margin-bottom: 10px; font-weight: 300; }
+        .firmas-final { font-family: 'Great Vibes', cursive; font-size: clamp(3rem, 12vw, 4rem); color: #8d7a64; margin: 0; line-height: 1.2; }
+        .agradecimiento { font-size: 0.95rem; letter-spacing: 2px; margin-top: 25px; opacity: 0.9; font-style: italic; }
+        .creditos { width: 100%; text-align: center; padding: 20px 10px; font-size: 0.5rem; letter-spacing: 1px; color: #1c1006; opacity: 0.4; text-transform: uppercase; box-sizing: border-box; }
+
+        /* ================= RESPONSIVE ================= */
+        @media (min-width: 768px) {
+            .cursive { font-size: 6rem; }
+            .nombres-tit { font-size: 3.6rem; }
+        }
+    </style>
+</head>
+<body class="bloqueado">
+
+<!-- ================= PORTADA ================= -->
+<div id="preloader">
+    <div class="contenedor-portada">
+        <img src="2.png" alt="Portada" class="preloader-full">
+        <video id="video-inicio" class="preloader-video" src="video.mp4" muted playsinline webkit-playsinline preload="auto"></video>
+        <div class="texto-tocar" id="texto-tocar">Abrir Invitación</div>
+    </div>
+</div>
+
+<audio id="musica-boda" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ================= CABECERA ================= -->
+<div class="header-section">
+    <div class="music-player" id="boton-musica">
+        <div class="play-button"></div>
+    </div>
+    <p class="cursive">A Night to<br>Remember</p>
+    <h1 class="nombres-tit">Mi Graduación</h1>
+</div>
+
+<!-- ================= ESTÁS INVITADO ================= -->
+<div class="seccion-invitado reveal">
+    <p class="inv-pre">Estás invitado a la</p>
+    <h2 class="inv-titulo">Graduación</h2>
+    <p class="inv-de">de</p>
+    <h3 class="inv-nombre">Paula Cedeño</h3>
+</div>
+
+<!-- ================= FOTO 2 + FOTO 3 + TEXTO ================= -->
+<div class="seccion-fotos-dobles reveal">
+    <div class="fotos-dobles">
+        <img src="foto2.jpeg" alt="Paula">
+        <img src="foto3.jpeg" alt="Paula">
+        <p class="texto-fotos">
+            Después de tantos años de aprendizajes, amistades, risas y recuerdos, llegó el momento de celebrar el comienzo de una nueva etapa.
+        </p>
+    </div>
+</div>
+<div class="seccion-padres reveal" style="padding: 60px 30px; text-align: center; background: url('fondo1001.png') center center / cover no-repeat; font-family: 'Cinzel', serif;">
+        <!-- Bloque Superior: Con la bendición -->
+        <div style="margin-bottom: 40px;">
+            <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-style: italic; color: #ffffff; line-height: 1.6; letter-spacing: 1px; margin-bottom: 20px;">
+                Gracias por su amor y acompañarme siempre
+            </p>
+            
+            <div class="divisor-elegante" style="width: 50px; height: 1px; background-color: #ffffff; margin: 0 auto; opacity: 0.6;"></div>
+        </div>
+
+
+        <!-- Bloque Medio: Padres del Novio -->
+        <div style="margin-bottom: 30px;">
+            <p style="font-size: 1.2rem; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 15px; color: #ffffff; font-weight: 600;">
+                Padres:
+            </p>
+            <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: #ffffff; line-height: 1.8;">
+                Paulo Cedeño Navas <br>
+ Shirley de Cedeño Moreno
+            </p>
+        </div>
+
+ 
+
+        <!-- Divisor inferior (ya estaba bien, solo ajusté el margen) -->
+        <div class="divisor-elegante" style="width: 50px; height: 1px; background-color: #8d7a64; margin: 0 auto 30px; opacity: 0.6;"></div>
+            <div class="divisor-elegante" style="width: 50px; height: 1px; background-color: #ffffff; margin: 0 auto; opacity: 0.6;"></div>
+
+        <!-- Bloque Inferior: Nombres de los Novios -->
+     <!-- BLOQUE INFERIOR: Nombres de los Novios (Estilo Minimalista) -->
+<div style="margin-top: 50px; text-align: center; font-family: 'Cinzel', serif;">
+
+    <!-- Nombre 1 -->
+    <p style="
+        font-size: 1.3rem; 
+        line-height: 1; 
+        color: #ffffff; 
+        letter-spacing: 10px; 
+        text-transform: uppercase; 
+        margin-bottom: 10px; 
+        font-weight: 600;">
+        PAULA CEDEÑO
+    </p>
+
+</div>
+
+    </div>
+<!-- ================= ITINERARIO ================= -->
+<div class="seccion-itinerario-gala reveal">
+    <div class="itin-grid">
+
+        <div class="itin-item">
+            <div class="itin-circulo">
+                <svg viewBox="0 0 64 64" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8" y="12" width="48" height="44" rx="5"/>
+                    <path d="M8 26h48"/>
+                    <path d="M20 6v12M44 6v12"/>
+                    <circle cx="20" cy="36" r="1.8" fill="#111"/><circle cx="32" cy="36" r="1.8" fill="#111"/><circle cx="44" cy="36" r="1.8" fill="#111"/>
+                    <circle cx="20" cy="46" r="1.8" fill="#111"/><circle cx="32" cy="46" r="1.8" fill="#111"/><circle cx="44" cy="46" r="1.8" fill="#111"/>
+                </svg>
+            </div>
+            <h3>Fecha:</h3>
+            <p>Sábado 16 de Enero del 2027</p>
+        </div>
+
+        <!-- IMPORTANTE: cambia este enlace por el de Google Maps exacto del lugar -->
+        <a class="itin-item" href="https://www.google.com/maps/search/?api=1&query=Hotel+Sheraton+Salon+de+Eventos+Santuario+Mercurio" target="_blank" rel="noopener">
+            <div class="itin-circulo">
+                <svg viewBox="0 0 64 64" fill="#111">
+                    <path d="M32 4C20.9 4 12 12.9 12 24c0 14.5 20 36 20 36s20-21.5 20-36C52 12.9 43.1 4 32 4zm0 28a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/>
+                </svg>
+            </div>
+            <h3>Lugar:</h3>
+            <p>Hotel Sheraton, Salón de Eventos Santuario - Mercurio</p>
+        </a>
+
+        <div class="itin-item">
+            <div class="itin-circulo">
+                <svg viewBox="0 0 64 64" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="32" cy="32" r="24"/>
+                    <path d="M32 16v16l11 7"/>
+                </svg>
+            </div>
+            <h3>Hora:</h3>
+            <p>8:00 pm</p>
+        </div>
+
+        <div class="itin-item">
+           <div class="itin-circulo">
+                <img src="dress.png" alt="Dress Code" style="width: 90%; height: 50%; object-fit: cover; border-radius: 80%;">
+            </div>
+            <h3>Dress Code:</h3>
+            <p>Traje formal Gala</p>
+        </div>
+
+    </div>
+
+    <a class="btn-ubicacion" href="https://maps.apple/p/yyK67io0SNzIzx" target="_blank" rel="noopener">
+        <svg viewBox="0 0 64 64" fill="currentColor"><path d="M32 4C20.9 4 12 12.9 12 24c0 14.5 20 36 20 36s20-21.5 20-36C52 12.9 43.1 4 32 4zm0 28a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+        Ver ubicación
+    </a>
+</div>
+
+<!-- ================= CALENDARIO ================= -->
+<div class="seccion-calendario reveal">
+    <div class="cal-arco">
+        <p class="cal-mes-sup">ENERO</p>
+        <div class="cal-fecha">
+            <span class="cal-txt">SÁBADO</span>
+            <span class="cal-num">16</span>
+            <span class="cal-txt">2027</span>
+        </div>
+        <h3 class="cal-script">El Gran Día</h3>
+        <p class="cal-mes">ENERO 2027</p>
+
+        <div class="cal-grid">
+            <span class="cal-sem">LUN</span><span class="cal-sem">MAR</span><span class="cal-sem">MIE</span><span class="cal-sem">JUE</span><span class="cal-sem">VIE</span><span class="cal-sem">SAB</span><span class="cal-sem">DOM</span>
+        </div>
+        <div class="cal-grid" id="cal-dias" style="margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- ================= CONTADOR ================= -->
+<div class="seccion-contador reveal">
+    <div class="capsula-tiempo">
+        <h3 class="preparate">¡PREPÁRATE!</h3>
+        <p class="nos-vemos">NOS VEMOS DENTRO DE</p>
+        <div class="timer-grid">
+            <div class="timer-item"><span id="days">00</span><div class="timer-label">Días</div></div>
+            <div class="timer-item"><span id="hours">00</span><div class="timer-label">Horas</div></div>
+            <div class="timer-item"><span id="minutes">00</span><div class="timer-label">Minutos</div></div>
+            <div class="timer-item"><span id="seconds">00</span><div class="timer-label">Segundos</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= REGALOS ================= -->
+<div class="seccion-regalos reveal">
+    <div class="tarjeta-regalo-cafe">
+        <h2 class="regalo-cursive-top">Regalo</h2>
+        <img src="regalo.png" alt="Regalo" class="icon-regalo-line">
+
+        <p>
+            El mejor regalo es compartir con ustedes este día tan especial y ser parte de este nuevo capítulo. Para quienes deseen acompañarnos con un obsequio. Agradecemos de corazón su cariño y generosidad.
+        </p>
+
+        <h4 class="titulo-datos-white">LLUVIA DE SOBRES</h4>
+        <img src="Gemini_Generated_Image_txcfjitxcfjitxcf-Photoroom.png" alt="Sobre" style="width:100px; height:auto;">
+    </div>
+</div>
+
+<!-- ================= LUGARES RESERVADOS =================
+     Se cambia desde el link:  ...index.html?pases=3&invitado=Familia%20Pérez  -->
+<div class="seccion-reservado reveal">
+    <div class="reservado-card">
+        <p class="res-pre">Hemos reservado</p>
+        <p class="res-num" id="num-pases">1</p>
+        <p class="res-lugar"><span id="texto-lugar">lugar</span> en tu honor</p>
+        <p class="res-invitado" id="nombre-invitado"></p>
+    </div>
+</div>
+
+<!-- ================= CONFIRMACIÓN ================= -->
+<div class="seccion-contador reveal">
+    <div class="confirmacion-texto">
+        <h2>Confirmación de asistencia</h2>
+        <p style="color: #ffffff; font-weight: 600; margin: 6px 0; text-align: justify;">
+            Para nosotros es indispensable contar con tu valiosa presencia. Agradecemos confirmar tu asistencia lo antes posible. <br><br>
+        </p>
+        <br>
+      <div id="contenedor-confirmar">
+    <a href="https://wa.me/593991199834?text=Confirmo%20mi%20asistencia%20a%20la%20graduaci%C3%B3n%20de%20Paula%20Cede%C3%B1o.%20Nombres%20de%20los%20asistentes:%20"
+       target="_blank"
+       class="btn-blanco-outline">
+       Confirmar aquí
+    </a>
+</div>
+    </div>
+</div>
+
+<!-- ================= GALERÍA ================= -->
+<div class="seccion-galeria reveal">
+    <p class="gal-sub">RECUERDOS</p>
+    <h2 class="gal-titulo">Momentos que me gustaría compartir contigo</h2>
+    <div class="galeria-grid">
+        <div class="foto-item"><img src="foto4.jpeg" alt="Foto 1" loading="lazy"></div>
+        <div class="foto-item"><img src="foto5.jpeg" alt="Foto 2" loading="lazy"></div>
+        <div class="foto-item"><img src="foto6.jpeg" alt="Foto 3" loading="lazy"></div>
+        <div class="foto-item"><img src="foto7.jpeg" alt="Foto 4" loading="lazy"></div>
+        <div class="foto-item"><img src="foto9.jpeg" alt="Foto 6" loading="lazy"></div>
+        <div class="foto-item"><img src="foto10.jpeg" alt="Foto 7" loading="lazy"></div>
+
+        <!-- Foto 8 horizontal, completa y sin recortes -->
+        <div class="foto-item foto-horizontal">
+            <img src="foto8.jpeg" alt="Foto 5" loading="lazy">
+        </div>
+    </div>
+</div>
+
+<!-- ================= INTERACTIVA (sin tarjetas) ================= -->
+<div class="seccion-interactiva reveal">
+    <p class="interactiva-sub">PARTICIPA</p>
+    <h2 class="interactiva-tit">Hazla inolvidable</h2>
+
+    <div class="interactiva-lista">
+        <div class="item-interactivo">
+            <img src="camara.png" alt="Fotos">
+            <h3>Fotos</h3>
+            <p>Queremos ver esta noche a través de tus ojos. Comparte tus momentos favoritos con nosotros.</p>
+            <a href="https://drive.google.com/drive/folders/1IEc-wp7ya4dEbF6zMON2lKhwkAVGxP3f?usp=sharing" target="_blank" rel="noopener" class="btn-gold">Subir fotos</a>
+        </div>
+
+        <div class="separador-dorado"><span>&#10022;</span></div>
+
+        <div class="item-interactivo">
+            <img src="bailar.png" alt="Música">
+            <h3>Playlist</h3>
+            <p>Ayúdanos a armar la playlist perfecta para celebrar juntos.</p>
+            <a href="https://www.youtube.com/playlist?list=PLFxgB-R26skI&jct=C1bK_-SL5ftlGiCmn0xQSw" target="_blank" rel="noopener" class="btn-gold">Sugerir canción</a>
+        </div>
+    </div>
+</div>
+
+<!-- ================= FINAL ================= -->
+<div class="seccion-final reveal" style="color: white;">
+    <div class="divisor-elegante" style="background-color: white;"></div>
+    <p class="texto-final" style="color: white;">Te esperamos</p>
+    <h2 class="firmas-final" style="color: white;">Paula Cedeño</h2>
+    <p class="agradecimiento">¡Gracias por formar parte de mi historia!</p>
+</div>
+
+<div class="creditos" style="text-align: center; padding: 20px; color: #888;">
+    <a href="https://wa.me/593960934663" target="_blank" style="color: #000000; text-decoration: none; font-weight: bold;">
+        Realizado por Invitaciones Digitales Loja / 0960934663
+    </a>
+</div>
+
+<!-- ================= VISOR DE FOTOS ================= -->
+<div id="lightbox">
+    <button class="lb-btn" id="lb-cerrar" aria-label="Cerrar">&times;</button>
+    <button class="lb-btn" id="lb-prev" aria-label="Anterior">&#10094;</button>
+    <img id="lb-img" src="" alt="Foto ampliada">
+    <button class="lb-btn" id="lb-next" aria-label="Siguiente">&#10095;</button>
+    <div id="lb-contador"></div>
+</div>
+
+<script>
+    // ---------- RECARGA DE IMÁGENES (menos la portada) ----------
+    window.addEventListener('load', () => {
+        document.querySelectorAll('img').forEach(img => {
+            if (img.closest('#preloader')) return;
+            const src = img.src;
+            if (src.includes('.png')) {
+                img.src = src + '?v=' + new Date().getTime();
+            }
+        });
+    });
+
+    // ---------- MÚSICA ----------
+    const musica = document.getElementById("musica-boda");
+    const btnMusica = document.getElementById("boton-musica");
+
+    btnMusica.addEventListener("click", () => {
+        if (musica.paused) {
+            musica.play();
+            btnMusica.classList.add("music-playing");
+        } else {
+            musica.pause();
+            btnMusica.classList.remove("music-playing");
+        }
+    });
+
+    // ---------- PORTADA ----------
+    const preloader = document.getElementById("preloader");
+    const video = document.getElementById("video-inicio");
+    const textoTocar = document.getElementById("texto-tocar");
+    let iniciado = false;
+    let abierto = false;
+
+    function abrirInvitacion() {
+        if (abierto) return;
+        abierto = true;
+        preloader.classList.add("hide");
+        document.body.classList.remove("bloqueado");
+        window.scrollTo(0, 0);
+        setTimeout(() => { preloader.style.display = "none"; }, 900);
+    }
+
+    preloader.addEventListener("click", () => {
+        if (iniciado) return;
+        iniciado = true;
+        textoTocar.classList.add("oculto");
+
+        btnMusica.style.display = "flex";
+        musica.play().then(() => {
+            btnMusica.classList.add("music-playing");
+        }).catch(err => console.log(err));
+
+        video.addEventListener("playing", () => video.classList.add("activo"), { once: true });
+        video.addEventListener("ended", abrirInvitacion);
+        video.addEventListener("error", abrirInvitacion);
+
+        const intento = video.play();
+        if (intento !== undefined) {
+            intento.catch(abrirInvitacion);
+        }
+
+        setTimeout(() => { if (!abierto && video.paused) abrirInvitacion(); }, 5000);
+    });
+
+    // ---------- CALENDARIO ENERO 2027 ----------
+    (function () {
+        const cont = document.getElementById("cal-dias");
+        const capSVG =
+            '<svg class="cap" viewBox="0 0 40 28" fill="#000" stroke="#d4af37" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">' +
+            '<path d="M10 12v7c0 3 20 3 20 0v-7"/>' +
+            '<polygon points="20,2 38,10 20,18 2,10"/>' +
+            '<path d="M35 11v10" fill="none"/>' +
+            '<circle cx="35" cy="22.5" r="1.8" fill="#d4af37" stroke="none"/>' +
+            '</svg>';
+        const vacios = (new Date(2027, 0, 1).getDay() + 6) % 7;
+        let html = "";
+        for (let i = 0; i < vacios; i++) html += "<span></span>";
+        for (let d = 1; d <= 31; d++) {
+            html += d === 16
+                ? '<span class="dia dia-grad">' + capSVG + '16</span>'
+                : '<span class="dia">' + d + '</span>';
+        }
+        cont.innerHTML = html;
+    })();
+
+    // ---------- CONTADOR ----------
+    const fechaEvento = new Date(2027, 0, 16, 20, 0, 0).getTime();
+    const updateCountdown = () => {
+        let distance = fechaEvento - new Date().getTime();
+        if (distance < 0) distance = 0;
+
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        const pad = n => (n < 10 ? "0" + n : n);
+
+        if (document.getElementById("days")) {
+            document.getElementById("days").innerText = pad(d);
+            document.getElementById("hours").innerText = pad(h);
+            document.getElementById("minutes").innerText = pad(m);
+            document.getElementById("seconds").innerText = pad(s);
+        }
+    };
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // ---------- SCROLL REVEAL ----------
+    const revealElements = document.querySelectorAll(".reveal");
+    const revealOnScroll = () => {
+        revealElements.forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                el.classList.add("active");
+            }
+        });
+    };
+    window.addEventListener("scroll", revealOnScroll);
+    revealOnScroll();
+
+    // ---------- LUGARES E INVITADO DESDE EL LINK ----------
+    const urlDatos = new URLSearchParams(window.location.search);
+    const pases = parseInt(urlDatos.get("pases"), 10);
+    const cantidad = pases > 0 ? pases : 1;
+    document.getElementById("num-pases").innerText = cantidad;
+    document.getElementById("texto-lugar").innerText = cantidad === 1 ? "lugar" : "lugares";
+
+    const nombreInvitado = urlDatos.get("invitado");
+    if (nombreInvitado) {
+        const el = document.getElementById("nombre-invitado");
+        el.innerText = nombreInvitado;
+        el.style.display = "block";
+    }
+
+    // ---------- VISOR DE FOTOS ----------
+    (function () {
+        const fotos = Array.from(document.querySelectorAll(".galeria-grid img"));
+        const lb = document.getElementById("lightbox");
+        const lbImg = document.getElementById("lb-img");
+        const contador = document.getElementById("lb-contador");
+        let actual = 0;
+
+        function mostrar(i) {
+            actual = (i + fotos.length) % fotos.length;
+            lbImg.src = fotos[actual].src;
+            contador.textContent = (actual + 1) + " / " + fotos.length;
+        }
+        function abrir(i) {
+            mostrar(i);
+            lb.classList.add("abierto");
+            document.body.classList.add("lb-abierto");
+        }
+        function cerrar() {
+            lb.classList.remove("abierto");
+            document.body.classList.remove("lb-abierto");
+        }
+
+        fotos.forEach((img, i) => img.addEventListener("click", () => abrir(i)));
+        document.getElementById("lb-cerrar").addEventListener("click", cerrar);
+        document.getElementById("lb-prev").addEventListener("click", e => { e.stopPropagation(); mostrar(actual - 1); });
+        document.getElementById("lb-next").addEventListener("click", e => { e.stopPropagation(); mostrar(actual + 1); });
+        lb.addEventListener("click", e => { if (e.target === lb) cerrar(); });
+
+        document.addEventListener("keydown", e => {
+            if (!lb.classList.contains("abierto")) return;
+            if (e.key === "Escape") cerrar();
+            if (e.key === "ArrowLeft") mostrar(actual - 1);
+            if (e.key === "ArrowRight") mostrar(actual + 1);
+        });
+
+        let x0 = null;
+        lb.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+        lb.addEventListener("touchend", e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 50) mostrar(actual + (dx < 0 ? 1 : -1));
+            x0 = null;
+        });
+    })();
+</script>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 1000, once: true });
+</script>
+</body>
+</html>
